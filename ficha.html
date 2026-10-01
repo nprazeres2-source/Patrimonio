@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha de Património — DRPM</title>
+<meta name="theme-color" content="#0f5c73">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#f2f6f6; --surface:#ffffff; --surface-2:#eaf1f1; --ink:#152226; --ink-muted:#54707a;
+  --ink-faint:#8ba3aa; --border:#d7e2e3; --border-strong:#bccdcf; --accent:#0f5c73;
+  --accent-strong:#0a4655; --accent-soft:#e1eef1; --accent-ink:#ffffff;
+  --danger:#a8422c; --danger-soft:#f6e4de;
+  --shadow: 0 8px 28px -8px rgba(15,45,53,0.28), 0 2px 8px -2px rgba(15,45,53,0.14);
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1719; --surface:#132226; --surface-2:#182c31; --ink:#e9f2f1; --ink-muted:#8fabb0;
+    --ink-faint:#5f7d83; --border:#25393e; --border-strong:#324b51; --accent:#5cc2d8;
+    --accent-strong:#8ad8e8; --accent-soft:#173338; --accent-ink:#08262b;
+    --danger:#e2937c; --danger-soft:#33201b;
+    --shadow: 0 10px 32px -8px rgba(0,0,0,0.55), 0 2px 10px -2px rgba(0,0,0,0.4);
+  }
+}
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  padding:24px 16px 48px;
+}
+.mono{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.wrap{ max-width:640px; margin:0 auto; }
+.notice{
+  display:flex; align-items:center; gap:8px; background:var(--accent-soft); color:var(--accent-strong);
+  border:1px solid var(--border); border-radius:8px; padding:8px 12px; margin-bottom:16px; font-size:12.5px;
+}
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.card-header{ padding:20px 22px 16px; border-bottom:1px solid var(--border); }
+.eyebrow{ text-transform:uppercase; letter-spacing:0.08em; font-size:11px; font-weight:600; color:var(--accent); margin:0 0 6px; }
+.card-header h1{ margin:0; font-size:21px; font-weight:700; letter-spacing:-0.01em; text-wrap:balance; }
+.card-header .sub{ margin:4px 0 0; color:var(--ink-muted); font-size:13px; }
+.groups{ padding:6px 22px 20px; }
+.group{ padding:14px 0; border-bottom:1px solid var(--border); }
+.group:last-child{ border-bottom:none; }
+.group h2{ margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); font-weight:700; }
+.row{ display:flex; gap:14px; padding:5px 0; font-size:14px; }
+.row .label{ flex:0 0 150px; color:var(--ink-muted); }
+.row .value{ flex:1; color:var(--ink); word-break:break-word; white-space:pre-wrap; }
+.empty-note, .state-note{ padding:18px 22px; color:var(--ink-muted); font-size:13.5px; }
+.state-note.error{ color:var(--danger); }
+.footer-meta{
+  padding:14px 22px; background:var(--surface-2); color:var(--ink-muted); font-size:12.5px;
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.btn-print{
+  margin-top:16px; display:inline-flex; align-items:center; gap:7px; border:1px solid var(--border-strong);
+  background:var(--surface); color:var(--ink); border-radius:8px; padding:9px 14px; font-size:13.5px;
+  font-weight:600; cursor:pointer;
+}
+.btn-print:hover{ background:var(--surface-2); }
+.btn-print[hidden]{ display:none; }
+.spinner{
+  width:22px; height:22px; border-radius:50%; border:3px solid var(--border-strong); border-top-color:var(--accent);
+  animation:spin .8s linear infinite; margin:30px auto;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+@media print{
+  body{ padding:0; background:#fff; }
+  .notice, .btn-print{ display:none; }
+  .card{ box-shadow:none; border:none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="notice">Ficha de consulta — só mostra este equipamento, sem acesso ao resto do inventário.</div>
+  <div class="card" id="card">
+    <div class="card-header" id="card-header">
+      <p class="eyebrow">Ficha de Património · DRPM</p>
+      <h1 id="heading">A carregar…</h1>
+      <p class="sub" id="subheading"></p>
+    </div>
+    <div class="groups" id="groups">
+      <div class="spinner"></div>
+    </div>
+    <div class="footer-meta" id="footer-meta" hidden>
+      <span id="updated-text"></span>
+    </div>
+  </div>
+  <button class="btn-print" id="btn-print" type="button" onclick="window.print()" hidden>Imprimir esta ficha</button>
+</div>
+
+<script src="firebase-config.js"></script>
+<script>
+(function(){
+  var FIELDS = [
+    {key:'imobilizado', label:'Imobilizado', group:'Identificação', kind:'mono'},
+    {key:'inventario', label:'N.º Inventário', group:'Identificação', kind:'mono'},
+    {key:'cibe', label:'CIBE', group:'Identificação', kind:'mono'},
+    {key:'pocp', label:'POCP', group:'Identificação', kind:'mono'},
+    {key:'sgc', label:'SGC', group:'Identificação', kind:'mono'},
+    {key:'genero', label:'Género', group:'Equipamento', kind:'text'},
+    {key:'tipo', label:'Tipo', group:'Equipamento', kind:'text'},
+    {key:'marca', label:'Marca', group:'Equipamento', kind:'text'},
+    {key:'modelo', label:'Modelo', group:'Equipamento', kind:'text'},
+    {key:'serie', label:'N.º Série', group:'Equipamento', kind:'mono'},
+    {key:'descricao', label:'Descrição', group:'Equipamento', kind:'textarea'},
+    {key:'ilha', label:'Ilha', group:'Localização', kind:'text'},
+    {key:'localizacao', label:'Localização', group:'Localização', kind:'text'},
+    {key:'sala', label:'Sala', group:'Localização', kind:'text'},
+    {key:'utilizador', label:'Utilizador', group:'Responsáveis', kind:'text'},
+    {key:'dirServ', label:'Dir. Serv.', group:'Responsáveis', kind:'text'},
+    {key:'projeto', label:'Projeto', group:'Responsáveis', kind:'text'},
+    {key:'dtAquisicao', label:'Dt. Aquisição', group:'Financeiro', kind:'text'},
+    {key:'valorUnitario', label:'Valor Unitário', group:'Financeiro', kind:'mono'},
+    {key:'depreciacao', label:'Depreciação', group:'Financeiro', kind:'mono'},
+    {key:'valorContabilistico', label:'Valor Contabilístico', group:'Financeiro', kind:'mono'},
+    {key:'observacoes', label:'Observações', group:'Observações', kind:'textarea'}
+  ];
+  var GROUP_ORDER = ['Identificação','Equipamento','Localização','Responsáveis','Financeiro','Observações'];
+
+  var els = {
+    heading: document.getElementById('heading'),
+    subheading: document.getElementById('subheading'),
+    groups: document.getElementById('groups'),
+    footerMeta: document.getElementById('footer-meta'),
+    updatedText: document.getElementById('updated-text'),
+    btnPrint: document.getElementById('btn-print')
+  };
+
+  function escapeHtml(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function formatDatePt(iso){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) return '';
+    var p = iso.split('-');
+    return p[2] + '/' + p[1] + '/' + p[0];
+  }
+  function showState(msg, isError){
+    els.groups.innerHTML = '<p class="state-note' + (isError ? ' error' : '') + '">' + escapeHtml(msg) + '</p>';
+  }
+  function loadScript(src){
+    return new Promise(function(resolve, reject){
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function(){ resolve(); };
+      s.onerror = function(){ reject(new Error('load_failed')); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function renderRecord(id, rec){
+    var imob = (rec.imobilizado || '').trim();
+    var inv = (rec.inventario || '').trim();
+    var genero = (rec.genero || '').trim();
+    var tipo = (rec.tipo || '').trim();
+    var heading = imob || inv || 'Equipamento sem identificação';
+    var subParts = [];
+    if (imob && inv) subParts.push('N.º Inventário ' + inv);
+    var gt = [genero, tipo].filter(Boolean).join(' / ');
+    if (gt) subParts.push(gt);
+
+    els.heading.textContent = heading;
+    els.subheading.textContent = subParts.length ? subParts.join(' · ') : 'Registo de património';
+    document.title = heading + ' — Ficha de Património DRPM';
+
+    var groupsHtml = '';
+    GROUP_ORDER.forEach(function(g){
+      var rows = '';
+      FIELDS.forEach(function(f){
+        if (f.group !== g) return;
+        var v = (rec[f.key] || '').toString().trim();
+        if (!v) return;
+        var cls = f.kind === 'mono' ? 'value mono' : 'value';
+        rows += '<div class="row"><div class="label">' + escapeHtml(f.label) + '</div><div class="' + cls + '">' + escapeHtml(v) + '</div></div>';
+      });
+      if (rows) groupsHtml += '<div class="group"><h2>' + escapeHtml(g) + '</h2>' + rows + '</div>';
+    });
+    els.groups.innerHTML = groupsHtml || '<p class="empty-note">Sem dados adicionais registados.</p>';
+
+    var ua = (rec.ultimaAtualizacao || '').trim();
+    els.updatedText.textContent = ua
+      ? ('Última atualização: ' + formatDatePt(ua))
+      : 'Registo original — sem edições registadas.';
+    els.footerMeta.hidden = false;
+    els.btnPrint.hidden = false;
+  }
+
+  function init(){
+    var params = new URLSearchParams(location.search);
+    var id = params.get('id');
+    if (!id){
+      els.heading.textContent = 'Ficha inválida';
+      showState('Não foi indicado nenhum equipamento. Use o código QR de uma etiqueta para abrir a ficha certa.', true);
+      return;
+    }
+    if (typeof FIREBASE_CONFIG === 'undefined' || !FIREBASE_CONFIG.projectId || FIREBASE_CONFIG.projectId === 'SUBSTITUA_AQUI'){
+      els.heading.textContent = 'Configuração em falta';
+      showState('Esta instalação ainda não tem o Firebase configurado (ficheiro firebase-config.js). Peça a quem administra o site para o configurar.', true);
+      return;
+    }
+
+    Promise.all([
+      loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js'),
+      loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js')
+    ]).then(function(){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      var db = firebase.firestore();
+      return db.collection('fichas').doc(id).get();
+    }).then(function(doc){
+      if (!doc.exists){
+        els.heading.textContent = 'Registo não encontrado';
+        showState('Não há dados para este equipamento. Pode ainda não ter sido sincronizado — peça a quem geriu o inventário para sincronizar as fichas.', true);
+        return;
+      }
+      renderRecord(id, doc.data() || {});
+    }).catch(function(err){
+      els.heading.textContent = 'Não foi possível carregar';
+      showState('Não foi possível ligar à base de dados (sem internet neste momento, ou ligação bloqueada). Tente novamente com ligação à internet.', true);
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
