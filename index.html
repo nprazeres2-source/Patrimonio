@@ -485,17 +485,17 @@
     {key:'cibe', label:'CIBE', group:'Identificação', kind:'mono'},
     {key:'pocp', label:'POCP', group:'Identificação', kind:'mono'},
     {key:'sgc', label:'SGC', group:'Identificação', kind:'mono'},
-    {key:'genero', label:'Género', group:'Equipamento', kind:'text'},
-    {key:'tipo', label:'Tipo', group:'Equipamento', kind:'text'},
-    {key:'marca', label:'Marca', group:'Equipamento', kind:'text'},
+    {key:'genero', label:'Género', group:'Equipamento', kind:'suggest'},
+    {key:'tipo', label:'Tipo', group:'Equipamento', kind:'suggest'},
+    {key:'marca', label:'Marca', group:'Equipamento', kind:'suggest'},
     {key:'modelo', label:'Modelo', group:'Equipamento', kind:'text'},
     {key:'serie', label:'N.º Série', group:'Equipamento', kind:'mono'},
     {key:'descricao', label:'Descrição', group:'Equipamento', kind:'textarea'},
-    {key:'ilha', label:'Ilha', group:'Localização', kind:'text'},
+    {key:'ilha', label:'Ilha', group:'Localização', kind:'suggest', presets:['Faial','São Miguel']},
     {key:'localizacao', label:'Localização', group:'Localização', kind:'text'},
-    {key:'sala', label:'Sala', group:'Localização', kind:'text'},
-    {key:'utilizador', label:'Utilizador', group:'Responsáveis', kind:'text'},
-    {key:'dirServ', label:'Dir. Serv.', group:'Responsáveis', kind:'text'},
+    {key:'sala', label:'Sala', group:'Localização', kind:'suggest', presets:['Gabinete 01','Gabinete 02','Gabinete 03','Gabinete 04','Gabinete 05','Gabinete 06','Gabinete 07','Gabinete 08','Gabinete 09','Gabinete 10','Gabinete 11','Gabinete 12','Gabinete 13','Gabinete 14']},
+    {key:'utilizador', label:'Utilizador', group:'Responsáveis', kind:'suggest'},
+    {key:'dirServ', label:'Dir. Serv.', group:'Responsáveis', kind:'suggest', presets:['DRPM','DSBPM','DSGCM']},
     {key:'projeto', label:'Projeto', group:'Responsáveis', kind:'text'},
     {key:'dtAquisicao', label:'Dt. Aquisição', group:'Financeiro', kind:'text', placeholder:'AAAA-MM-DD'},
     {key:'valorUnitario', label:'Valor Unitário', group:'Financeiro', kind:'mono'},
@@ -552,6 +552,23 @@
   function isRetired(rec){
     var v = (rec.valorContabilistico || '') + (rec.valorUnitario || '');
     return /abatid/i.test(v);
+  }
+  function suggestValues(f){
+    var seen = {};
+    var out = [];
+    (f.presets || []).forEach(function(v){
+      if (!seen[v]){ seen[v] = true; out.push(v); }
+    });
+    records.forEach(function(r){
+      var v = (r[f.key] || '').trim();
+      if (v && !seen[v]){ seen[v] = true; out.push(v); }
+    });
+    // mantém os valores predefinidos pela ordem dada; o resto por ordem alfabética
+    var presetSet = {};
+    (f.presets || []).forEach(function(v){ presetSet[v] = true; });
+    var presetPart = out.filter(function(v){ return presetSet[v]; });
+    var restPart = out.filter(function(v){ return !presetSet[v]; }).sort(function(a,b){ return a.localeCompare(b, 'pt'); });
+    return presetPart.concat(restPart);
   }
   function cleanRecord(raw){
     var out = {};
@@ -867,6 +884,11 @@
     var ph = f.placeholder ? ' placeholder="'+escapeHtml(f.placeholder)+'"' : '';
     var monoClass = f.kind === 'mono' ? ' class="mono"' : '';
     if (f.kind === 'textarea') return '<textarea id="fld-'+f.key+'"'+ph+'>'+escapeHtml(value)+'</textarea>';
+    if (f.kind === 'suggest'){
+      var opts = suggestValues(f).map(function(v){ return '<option value="'+escapeHtml(v)+'">'; }).join('');
+      return '<input id="fld-'+f.key+'" type="text" list="dl-'+f.key+'" autocomplete="off" value="'+escapeHtml(value)+'">' +
+        '<datalist id="dl-'+f.key+'">' + opts + '</datalist>';
+    }
     return '<input id="fld-'+f.key+'" type="text"'+monoClass+ph+' value="'+escapeHtml(value)+'">';
   }
 
